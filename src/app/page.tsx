@@ -1,94 +1,69 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useMemo, useState } from 'react';
+
+import dynamic from 'next/dynamic';
+
+import { getCountriesList } from '@/api/countries';
+import { ICountryJSON } from '@/interfaces/countries.interfaces';
+
+import LoaderSpinner from './components/LoaderSpinner/LoaderSpinner';
+import styles from './page.module.css';
 
 export default function Home() {
+  const countries = getCountriesList();
+
+  const [countrySelected, setCountrySelected] = useState<ICountryJSON>(
+    countries?.[0] ?? undefined
+  );
+
+  // Load the map component
+  const Map = useMemo(
+    () =>
+      dynamic(() => import('./components/Map/Map'), {
+        loading: () => (
+          <div className={styles.mapLoading}>
+            <LoaderSpinner />
+          </div>
+        ),
+        ssr: false,
+      }),
+    []
+  );
+
+  const handleSelectCountry = (country: ICountryJSON) => {
+    setCountrySelected(country);
+  };
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+      <h1>TOTS - Test FE</h1>
+
+      <div className={styles.container}>
+        {/* Marker List */}
+        <div className={styles.list}>
+          <div className={styles.listHeader}>
+            <h4>Countries</h4>
+          </div>
+
+          {countries.map((country) => (
+            <div
+              key={country.Country}
+              className={`${styles.listItem} ${
+                countrySelected?.Country === country.Country
+                  ? styles.listItemSelected
+                  : ''
+              }`}
+              onClick={() => handleSelectCountry(country)}
+            >
+              <p>{country.Country}</p>
+              <p>{`ISO: ${country['ISO Code']}`}</p>
+            </div>
+          ))}
         </div>
-      </div>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+        {/* Map */}
+        <Map countries={countries} countrySelected={countrySelected} />
       </div>
     </main>
   );

@@ -1,0 +1,25 @@
+.popupContainer {
+  width: 200px;
+
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.list {
+  list-style: none;
+}
+
+.list li {
+  font-size: 1.15em;
+  line-height: 1.4em;
+}
+
+.list span {
+  font-weight: 500;
+}
